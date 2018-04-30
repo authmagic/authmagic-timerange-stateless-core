@@ -1,6 +1,6 @@
 const sha256 = require('./sha256');
 
-module.exports = function generateKeyFromUserAndDuration(user, duration) {
+module.exports = function generateEkeyFromUserAndDuration(user, duration) {
   const timestamp = Math.floor(new Date().getTime()/1000);
   const i = Math.floor(timestamp/duration);
   const mi = duration*i;

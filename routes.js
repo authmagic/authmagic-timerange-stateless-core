@@ -1,33 +1,35 @@
 const jwt = require('jsonwebtoken');
 const NodeCache = require('node-cache');
-const generateKeyFromUserAndDuration = require('./utils/generateKeyFromUserAndDuration');
+const generateEkeyFromUserAndDuration = require('./utils/generateEkeyFromUserAndDuration');
 const {encrypt, decrypt} = require('./utils/aes');
 const tokensCache = new NodeCache();
 const truthCache = new NodeCache();
 
+// ekey, eproof=encrypt(ekey)
+
 async function handleKeyVerification(ctx, config) {
-  const {z} = ctx.request.body;
+  const {ekey} = ctx.request.body;
   const {duration} = config;
   // TODO check how library works, get operation might be blocking
-  const token = tokensCache.get(z);
+  const token = tokensCache.get(ekey);
   if(token) {
     ctx.ok({token});
-    truthCache.set(z, true, duration);
+    truthCache.set(ekey, true, duration);
   } else {
     ctx.forbidden();
   }
 }
 
 async function handleProofVerification(ctx, config) {
-  const {zp} = ctx.request.body;
+  const {eproof} = ctx.request.body;
   const {key} = config;
 
-  const z = decrypt(zp, key);
-  if(z && truthCache.get(z)) {
-    const token = tokensCache.get(z);
+  const ekey = decrypt(eproof, key);
+  if(ekey && truthCache.get(ekey)) {
+    const token = tokensCache.get(ekey);
     ctx.ok({token});
-    truthCache.del(z);
-    tokensCache.del(z);
+    truthCache.del(ekey);
+    tokensCache.del(ekey);
   } else {
     ctx.forbidden();
   }
@@ -36,26 +38,26 @@ async function handleProofVerification(ctx, config) {
 async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
   const {duration, expiresIn, key} = config;
   const {user, params} = ctx.request.body;
-  const z = generateKeyFromUserAndDuration(user, duration);
+  const ekey = generateEkeyFromUserAndDuration(user, duration);
   const token = jwt.sign({u: user, p: params}, key, {expiresIn});
-  const zp = encrypt(z, key);
-  tokensCache.set(z, token, duration);
-  ctx.ok({zp});
-  sendKeyPlugin({user, params, z, config});
+  const eproof = encrypt(ekey, key);
+  tokensCache.set(ekey, token, duration);
+  ctx.ok({eproof});
+  sendKeyPlugin({user, params, ekey, config});
 }
 
 async function handleTokenGeneration(ctx, config) {
-  const {z, zp} = ctx.request.body;
-  if(z) {
+  const {ekey, eproof} = ctx.request.body;
+  if(ekey) {
     await handleKeyVerification(ctx, config);
-  } else if(zp) {
+  } else if(eproof) {
     await handleProofVerification(ctx, config);
   }
 }
 
 async function handleTokenVerification(ctx, config) {
   const {key} = config;
-  const token = ctx.params.token;
+  const {token} = ctx.params;
   jwt.verify(token, key, function(err) {
     if (err) {
       ctx.forbidden();
