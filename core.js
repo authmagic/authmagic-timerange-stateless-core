@@ -1,8 +1,9 @@
 const path = require('path');
 const {handleKeyGeneration, handleTokenGeneration, handleTokenVerification} = require('./routes');
+const getCoreConfigFromConfig = require('./utils/getCoreConfigFromConfig');
 
 module.exports = function(router, config) {
-  const {key, sendKeyPlugin: sendKeyPluginName} = config;
+  const {key, sendKeyPlugin: sendKeyPluginName} = getCoreConfigFromConfig(config);
   if(!sendKeyPluginName) {
     console.log('sendKeyPlugin plugin is undefined');
     process.exit(-1);
