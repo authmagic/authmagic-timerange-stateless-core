@@ -1,0 +1,6 @@
+{
+  "duration": 300,
+  "key": "fd5eb88c6955b86d",
+  "sendKeyPlugin": "authmagic-email-plugin",
+  "expiresIn": 1200
+}
