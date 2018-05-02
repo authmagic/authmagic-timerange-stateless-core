@@ -1,5 +1,5 @@
 {
-  "name": "authmagic-timerange-core",
+  "name": "authmagic-timerange-stateless-core",
   "version": "1.0.0",
   "description": "",
   "main": "core.js",
