@@ -3,34 +3,57 @@ const NodeCache = require('node-cache');
 const generateEkeyFromUserAndDuration = require('./utils/generateEkeyFromUserAndDuration');
 const {encrypt, decrypt} = require('./utils/aes');
 const getCoreConfigFromConfig = require('./utils/getCoreConfigFromConfig');
+const getRefreshTokenFromTokenAndKey = require('./utils/getRefreshTokenFromTokenAndKey');
+const getToken = require('./utils/getToken');
 const tokensCache = new NodeCache();
 const truthCache = new NodeCache();
 
 // ekey, eproof=encrypt(ekey)
 
-async function handleKeyVerification(ctx, config) {
+// TODO add validation
+async function handleTokenGenerationFromEkey(ctx, config) {
   const {ekey} = ctx.request.body;
-  const {duration} = getCoreConfigFromConfig(config);
+  const {duration, key} = getCoreConfigFromConfig(config);
   // TODO check how library works, get operation might be blocking
   const token = tokensCache.get(ekey);
   if(token) {
-    ctx.ok({token});
+    const refreshToken = getRefreshTokenFromTokenAndKey(token, key);
+    ctx.ok({token, refreshToken});
     truthCache.set(ekey, true, duration);
   } else {
     ctx.forbidden();
   }
 }
 
-async function handleProofVerification(ctx, config) {
+async function handleTokenGenerationFromProof(ctx, config) {
   const {eproof} = ctx.request.body;
   const {key} = getCoreConfigFromConfig(config);
 
   const ekey = decrypt(eproof, key);
   if(ekey && truthCache.get(ekey)) {
     const token = tokensCache.get(ekey);
-    ctx.ok({token});
+    const refreshToken = getRefreshTokenFromTokenAndKey(token, key);
+    ctx.ok({token, refreshToken});
     truthCache.del(ekey);
     tokensCache.del(ekey);
+  } else {
+    ctx.forbidden();
+  }
+}
+
+async function handleTokenGenerationFromRefreshToken(ctx, config) {
+  const {token, refreshToken} = ctx.request.body;
+  const {key, expiresIn} = getCoreConfigFromConfig(config);
+  if(refreshToken === getRefreshTokenFromTokenAndKey(token, key)) {
+    jwt.verify(token, key, function(err, decoded) {
+      if(err) {
+        ctx.forbidden();
+      } else {
+        const token = getToken(decoded, key, {expiresIn});
+        const refreshToken = getRefreshTokenFromTokenAndKey(token, key);
+        ctx.ok({token, refreshToken});
+      }
+    });
   } else {
     ctx.forbidden();
   }
@@ -40,7 +63,7 @@ async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
   const {duration, expiresIn, key} = getCoreConfigFromConfig(config);
   const {user, params} = ctx.request.body;
   const ekey = generateEkeyFromUserAndDuration(user, duration);
-  const token = jwt.sign({u: user, p: params}, key, {expiresIn});
+  const token = getToken({u: user, p: params}, key, {expiresIn});
   const eproof = encrypt(ekey, key);
   tokensCache.set(ekey, token, duration);
   ctx.ok({eproof});
@@ -48,11 +71,13 @@ async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
 }
 
 async function handleTokenGeneration(ctx, config) {
-  const {ekey, eproof} = ctx.request.body;
+  const {ekey, eproof, token, refreshToken} = ctx.request.body;
   if(ekey) {
-    await handleKeyVerification(ctx, config);
+    await handleTokenGenerationFromEkey(ctx, config);
   } else if(eproof) {
-    await handleProofVerification(ctx, config);
+    await handleTokenGenerationFromProof(ctx, config);
+  } else if(token && refreshToken) {
+    await handleTokenGenerationFromRefreshToken(ctx, config);
   }
 }
 
@@ -69,8 +94,8 @@ async function handleTokenVerification(ctx, config) {
 }
 
 module.exports = {
-  handleKeyVerification,
-  handleProofVerification,
+  handleTokenGenerationFromEkey,
+  handleTokenGenerationFromProof,
   handleKeyGeneration,
   handleTokenGeneration,
   handleTokenVerification,
