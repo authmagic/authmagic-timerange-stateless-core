@@ -61,13 +61,13 @@ async function handleTokenGenerationFromRefreshToken(ctx, config) {
 
 async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
   const {duration, expiresIn, key} = getCoreConfigFromConfig(config);
-  const {user, params} = ctx.request.body;
+  const {user, redirectUrl, params} = ctx.request.body;
   const ekey = generateEkeyFromUserAndDuration(user, duration);
   const token = getToken({u: user, p: params}, key, {expiresIn});
   const eproof = encrypt(ekey, key);
   tokensCache.set(ekey, token, duration);
   ctx.ok({eproof});
-  sendKeyPlugin({user, params, ekey, config});
+  sendKeyPlugin({user, redirectUrl, params, ekey, config});
 }
 
 async function handleTokenGeneration(ctx, config) {
