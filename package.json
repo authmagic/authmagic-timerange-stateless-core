@@ -1,6 +1,6 @@
 {
   "name": "authmagic-timerange-stateless-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "core.js",
   "dependencies": {
@@ -10,8 +10,8 @@
   "scripts": {
     "test": "ava"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["auth", "authentication", "authorization", "openid", "oauth2", "stateless", "passwordless", "jwt"],
+  "author": "Oleksandr Knyga <oleksandrknyga@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "ava": "^0.25.0"
