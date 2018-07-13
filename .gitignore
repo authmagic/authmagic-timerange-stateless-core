@@ -4,3 +4,5 @@ npm-debug.log
 
 # IDE
 .idea
+
+.DS_Store
