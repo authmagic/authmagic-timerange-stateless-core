@@ -4,7 +4,7 @@ Stateless and passwordless authentication core for <a href="https://github.com/a
 
 Magic link
 -----------
-To check the identity of the user it is possible to send to his email, phone or any other resource he owns an authorization link. By clicking on that link user identifies himself as an owner of the resource. You can see many apps who suggest this option, for example <a href="https://medium.com/">medium.com</a> and <a href="https://auth0.com/">auth0.com</a>.
+To check the identity of the user it is possible to send an authorization link to his email, phone or any other resource. By clicking on that link user identifies himself as an owner of the resource. You can see many apps who suggest this option, for example <a href="https://medium.com/">medium.com</a> and <a href="https://auth0.com/">auth0.com</a>.
 <img src="https://github.com/authmagic/authmagic/blob/master/docs/images/authmagic-timerange-stateless-core.png?raw=true" width="600px"/>
 
 How it looks in the real world:
