@@ -12,7 +12,7 @@
   },
   "keywords": ["auth", "authentication", "authorization", "openid", "oauth2", "stateless", "passwordless", "jwt"],
   "author": "Oleksandr Knyga <oleksandrknyga@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "ava": "^0.25.0"
   }
