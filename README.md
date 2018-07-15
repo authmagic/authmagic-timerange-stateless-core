@@ -1,3 +1,5 @@
+<img src="https://github.com/authmagic/authmagic/blob/master/docs/images/logo.png?raw=true" width="300px"/>
+
 authmagic-timerange-stateless-core
 ========================
 Stateless and passwordless authentication core for <a href="https://github.com/authmagic/authmagic">authmagic</a>.
