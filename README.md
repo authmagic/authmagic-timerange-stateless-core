@@ -89,4 +89,4 @@ See existining plugins for real examples: <a href="https://github.com/authmagic/
 
 Licence
 -----------
-authmagic-timerange-stateless-core [MIT licensed](./LICENSE).
+authmagic-timerange-stateless-core is [MIT licensed](./LICENSE).
