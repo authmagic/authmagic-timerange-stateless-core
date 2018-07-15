@@ -86,3 +86,7 @@ sendKeyPlugin({user, redirectUrl, params, ekey, config});
 ```
 So plugin is a function with arguments you see above.
 See existining plugins for real examples: <a href="https://github.com/authmagic/authmagic-email-plugin">authmagic-email-plugin</a>, <a href="https://github.com/authmagic/authmagic-proxy-plugin">authmagic-proxy-plugin</a>, <a href="https://github.com/authmagic/authmagic-smsc-plugin">authmagic-smsc-plugin</a>.
+
+Licence
+-----------
+authmagic [MIT licensed](./LICENSE).
