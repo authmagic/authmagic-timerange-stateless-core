@@ -1,6 +1,6 @@
 {
   "name": "authmagic-timerange-stateless-core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "core.js",
   "dependencies": {
