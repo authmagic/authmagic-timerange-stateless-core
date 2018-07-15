@@ -1,8 +1,11 @@
 {
   "name": "authmagic-timerange-stateless-core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "core.js",
+  "engines": {
+    "node" : ">=8.10.0"
+  },
   "dependencies": {
     "jsonwebtoken": "^8.2.1",
     "node-cache": "^4.2.0"
