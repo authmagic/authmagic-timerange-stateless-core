@@ -1,6 +1,6 @@
 {
   "name": "authmagic-timerange-stateless-core",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "main": "core.js",
   "engines": {
@@ -18,5 +18,13 @@
   "license": "MIT",
   "devDependencies": {
     "ava": "^0.25.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/authmagic/authmagic-timerange-stateless-core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/authmagic/authmagic-timerange-stateless-core.git"
+  },
+  "homepage": "https://github.com/authmagic/authmagic-timerange-stateless-core#readme"
 }
