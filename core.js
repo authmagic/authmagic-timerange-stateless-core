@@ -1,5 +1,5 @@
 const path = require('path');
-const {handleKeyGeneration, handleTokenGeneration, handleTokenVerification, getKeyFromProof} = require('./routes');
+const {handleKeyGeneration, handleTokenGeneration, handleTokenVerification} = require('./routes');
 const getCoreConfigFromConfig = require('./utils/getCoreConfigFromConfig');
 
 module.exports = function(router, config) {
@@ -10,7 +10,6 @@ module.exports = function(router, config) {
   }
 
   const sendKeyPlugin = require(path.resolve(`./node_modules/${sendKeyPluginName}/plugin`));
-  router.get('/key', (ctx) => getKeyFromProof(ctx, config, sendKeyPlugin));
   router.post('/key', (ctx) => handleKeyGeneration(ctx, config, sendKeyPlugin));
   router.post('/token', (ctx) => handleTokenGeneration(ctx, config));
   router.post('/token/status', (ctx) => handleTokenVerification(ctx, config));

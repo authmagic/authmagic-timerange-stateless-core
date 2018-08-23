@@ -66,11 +66,15 @@ async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
 }
 
 async function handleTokenGeneration(ctx, config) {
-  const {ekey, token, refreshToken} = ctx.request.body;
+  const {ekey, token, refreshToken, eproof} = ctx.request.body;
   if(ekey) {
     await handleTokenGenerationFromEkey(ctx, config);
   } else if(token && refreshToken) {
     await handleTokenGenerationFromRefreshToken(ctx, config);
+  } else if(eproof) {
+    await getKeyFromProof(ctx, config);
+  } else {
+    ctx.forbidden();
   }
 }
 
