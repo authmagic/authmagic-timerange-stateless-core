@@ -22,6 +22,11 @@ Stateless
 -----------
 Current core is sharing JWT tokens by request what allows not to keep any state data.
 
+Middlewares
+-----------
+
+1. <a href="https://github.com/authmagic/authmagic-timerange-stateless-express-middleware">express.js</a>
+
 API
 -----------
 Core expects json format of data.
