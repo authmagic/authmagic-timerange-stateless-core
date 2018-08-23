@@ -17,7 +17,7 @@ async function handleTokenGenerationFromEkey(ctx, config) {
   // TODO check how library works, get operation might be blocking
   const token = tokensCache.get(ekey);
   if(token) {
-    const refreshToken = getRefreshTokenFromTokenAndKey(token, key);
+    const refreshToken = getRefreshTokenFromTokenAndKey(token, key);;
     ctx.ok({token, refreshToken});
     truthCache.set(ekey, true, duration);
   } else {
@@ -25,17 +25,12 @@ async function handleTokenGenerationFromEkey(ctx, config) {
   }
 }
 
-async function handleTokenGenerationFromProof(ctx, config) {
+async function getKeyFromProof(ctx, config) {
   const {eproof} = ctx.request.body;
   const {key} = getCoreConfigFromConfig(config);
-
   const ekey = decrypt(eproof, key);
   if(ekey && truthCache.get(ekey)) {
-    const token = tokensCache.get(ekey);
-    const refreshToken = getRefreshTokenFromTokenAndKey(token, key);
-    ctx.ok({token, refreshToken});
-    truthCache.del(ekey);
-    tokensCache.del(ekey);
+    ctx.ok({ekey});
   } else {
     ctx.forbidden();
   }
@@ -71,11 +66,9 @@ async function handleKeyGeneration(ctx, config, sendKeyPlugin) {
 }
 
 async function handleTokenGeneration(ctx, config) {
-  const {ekey, eproof, token, refreshToken} = ctx.request.body;
+  const {ekey, token, refreshToken} = ctx.request.body;
   if(ekey) {
     await handleTokenGenerationFromEkey(ctx, config);
-  } else if(eproof) {
-    await handleTokenGenerationFromProof(ctx, config);
   } else if(token && refreshToken) {
     await handleTokenGenerationFromRefreshToken(ctx, config);
   }
@@ -83,7 +76,7 @@ async function handleTokenGeneration(ctx, config) {
 
 async function handleTokenVerification(ctx, config) {
   const {key} = getCoreConfigFromConfig(config);
-  const {token} = ctx.params;
+  const {token} = ctx.request.body;
   jwt.verify(token, key, function(err) {
     if (err) {
       ctx.forbidden();
@@ -95,7 +88,7 @@ async function handleTokenVerification(ctx, config) {
 
 module.exports = {
   handleTokenGenerationFromEkey,
-  handleTokenGenerationFromProof,
+  getKeyFromProof,
   handleKeyGeneration,
   handleTokenGeneration,
   handleTokenVerification,
