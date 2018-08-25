@@ -6,7 +6,7 @@ function checkMode(actual, expected) {
 
 function encrypt(text, key, mode = 'aes-128-cbc') {
   const iv = checkMode(mode, 'aes-128-ecb') ? Buffer.alloc(0) : crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(mode, key, iv);
+  const cipher = crypto.createCipheriv(mode, key.toString(), iv);
   const encrypted = cipher.update(text);
   const finalBuffer = Buffer.concat([encrypted, cipher.final()]);
   if(checkMode(mode, 'aes-128-ecb')) {
@@ -24,7 +24,7 @@ function decrypt(text, key, mode = 'aes-128-cbc') {
   const arrText = text.split(':');
   const iv = arrText.length === 1 ? Buffer.alloc(0) : new Buffer(arrText[0], 'hex');
   const encrypted = new Buffer(arrText.pop(), 'hex');
-  const decipher = crypto.createDecipheriv(mode, key, iv);
+  const decipher = crypto.createDecipheriv(mode, key.toString(), iv);
   const decrypted = decipher.update(encrypted);
   try {
     return Buffer.concat([decrypted, decipher.final()]).toString();
