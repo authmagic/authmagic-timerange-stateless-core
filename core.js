@@ -8,7 +8,7 @@ const getToken = (data, key, options) => jwt.sign(_.omit(data, ['iat', 'exp']), 
 const getRefreshToken = (token, key, options) => jwt.sign({signature: jwt.decode(token, {complete: true}).signature}, key, options);
 const checkRefreshToken = (token, refreshToken, key) => {
   try {
-    if(jwt.verify(token, key) && jwt.verify(refreshToken, key)) {
+    if(jwt.verify(refreshToken, key)) {
       return jwt.decode(token, {complete: true}).signature === jwt.decode(refreshToken).signature;
     }
   } catch(e) {
@@ -73,15 +73,10 @@ module.exports = function(router, config) {
     async function generateTokenFromRefreshToken(ctx) {
       const {token, refreshToken} = ctx.request.body;
       if(checkRefreshToken(token, refreshToken, key)) {
-        jwt.verify(token, key, function(err, decoded) {
-          if(err) {
-            ctx.forbidden();
-          } else {
-            const token = getToken(decoded, key, {expiresIn});
-            const refreshToken = getRefreshToken(token, key, {expiresIn: refreshExpiresIn});
-            ctx.ok({token, refreshToken});
-          }
-        });
+        const decoded = jwt.decode(token);
+        const newToken = getToken(decoded, key, {expiresIn})
+        const refreshToken = getRefreshToken(newToken, key, {expiresIn: refreshExpiresIn});
+        ctx.ok({token: newToken, refreshToken});
       } else {
         ctx.forbidden();
       }
