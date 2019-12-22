@@ -28,7 +28,8 @@ const wrapKey = (securityKey, key) => securityKey + key.substr(0, key.length - s
 // TODO add scan with npm audit, nsp and snyk
 // TODO blacklist tokens
 module.exports = function(router, config) {
-  const {key, expiresIn, refreshExpiresIn, securityKeyRule, sendKeyPlugin: sendKeyPluginName} = getCoreConfigFromConfig(config);
+  const {key, expiresIn, refreshExpiresIn, securityKeyRule, fixedSecurityCodes,
+    sendKeyPlugin: sendKeyPluginName} = getCoreConfigFromConfig(config);
   if(!sendKeyPluginName) {
     console.log('sendKeyPlugin plugin is undefined');
     process.exit(-1);
@@ -40,7 +41,8 @@ module.exports = function(router, config) {
     const {user, redirectUrl, params} = ctx.request.body;
     const token = getToken({u: user, p: params}, key, {expiresIn});
     const ekey = encrypt(token, key);
-    const securityKey = generateRandomString(securityKeyRule);
+    const securityKey = fixedSecurityCodes[user] ? fixedSecurityCodes[user]
+      : generateRandomString(securityKeyRule);
     const eproof = encrypt(ekey, wrapKey(securityKey, key));
     ctx.ok({eproof});
     sendKeyPlugin({user, redirectUrl, params, ekey, securityKey, config});

@@ -9,4 +9,8 @@ module.exports = {
     length: 6,
     charset: "numeric",
   },
+  // for debugging and app validations
+  // username: securityCode
+  fixedSecurityCodes: {
+  },
 };
