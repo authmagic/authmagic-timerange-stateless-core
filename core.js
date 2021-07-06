@@ -20,7 +20,7 @@ const checkRefreshToken = (token, refreshToken, key) => {
 };
 const wrapKey = (securityKey, key) => securityKey + key.substr(0, key.length - securityKey.toString().length);
 
-const getHandleRateLimiter = ({ isRateLimiterEnabled, points, blockDuration, duration }) => {
+const getHandleRateLimiter = ({ isRateLimiterEnabled = false, points, blockDuration, duration } = {}) => {
   if (isRateLimiterEnabled) {
     const rateLimiter = new RateLimiterMemory({ points, blockDuration, duration });
 
@@ -53,10 +53,7 @@ module.exports = function(router, config) {
     refreshExpiresIn,
     securityKeyRule,
     fixedSecurityCodes,
-    isRateLimiterEnabled,
-    rateLimiterPoints: points,
-    rateLimiterBlockDurationSeconds: blockDuration,
-    rateLimiterDuration: duration,
+    rateLimiterConfig,
     sendKeyPlugin: sendKeyPluginName
   } = getCoreConfigFromConfig(config);
 
@@ -66,9 +63,8 @@ module.exports = function(router, config) {
   }
 
   const sendKeyPlugin = require(path.resolve(`./node_modules/${sendKeyPluginName}/plugin`));
-  const handleRateLimiter = getHandleRateLimiter({ isRateLimiterEnabled, points, blockDuration, duration });
 
-  router.post('/key', handleRateLimiter, async function handleKeyGeneration(ctx) {
+  router.post('/key', getHandleRateLimiter(rateLimiterConfig['/key']), async function handleKeyGeneration(ctx) {
     const {user, redirectUrl, params} = ctx.request.body;
     const token = getToken({u: user, p: params}, key, {expiresIn});
     const ekey = encrypt(token, key);
@@ -79,7 +75,7 @@ module.exports = function(router, config) {
     sendKeyPlugin({user, redirectUrl, params, ekey, securityKey, config});
   });
 
-  router.post('/token/status', async function handleTokenVerification(ctx) {
+  router.post('/token/status', getHandleRateLimiter(rateLimiterConfig['/token/status']), async function handleTokenVerification(ctx) {
     const {token} = ctx.request.body;
     jwt.verify(token, key, function(err) {
       if (err) {
@@ -91,7 +87,7 @@ module.exports = function(router, config) {
     });
   });
 
-  router.post('/token', async function handleTokenGeneration(ctx) {
+  router.post('/token', getHandleRateLimiter(rateLimiterConfig['/token']), async function handleTokenGeneration(ctx) {
     async function generateTokenFromEkey(ctx) {
       const {ekey} = ctx.request.body;
       const token = decrypt(ekey, key);
