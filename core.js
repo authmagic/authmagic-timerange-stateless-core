@@ -2,6 +2,7 @@ const path = require('path');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const generateRandomString = require('randomstring').generate;
+const { RateLimiterMemory } = require('rate-limiter-flexible');
 const getCoreConfigFromConfig = require('./utils/getCoreConfigFromConfig');
 const {encrypt, decrypt} = require('./utils/aes');
 const getToken = (data, key, options) => jwt.sign(_.omit(data, ['iat', 'exp']), key, options);
@@ -19,6 +20,24 @@ const checkRefreshToken = (token, refreshToken, key) => {
 };
 const wrapKey = (securityKey, key) => securityKey + key.substr(0, key.length - securityKey.toString().length);
 
+const getHandleRateLimiter = ({ isRateLimiterEnabled, points, blockDuration, duration }) => {
+  if (isRateLimiterEnabled) {
+    const rateLimiter = new RateLimiterMemory({ points, blockDuration, duration });
+
+    return async (ctx, next) => {
+      try {
+        await rateLimiter.consume(ctx.ip);
+        await next();
+      } catch (rejRes) {
+        ctx.status = 429;
+        ctx.body = `Too Many Requests for ${ctx.ip}.`;
+      }
+    }
+  }
+
+  return async (ctx, next) => await next();
+};
+
 // TODO add validation for every route
 // TODO add brute checker https://github.com/llambda/koa-brute
 // TODO add rate-limit
@@ -28,16 +47,28 @@ const wrapKey = (securityKey, key) => securityKey + key.substr(0, key.length - s
 // TODO add scan with npm audit, nsp and snyk
 // TODO blacklist tokens
 module.exports = function(router, config) {
-  const {key, expiresIn, refreshExpiresIn, securityKeyRule, fixedSecurityCodes,
-    sendKeyPlugin: sendKeyPluginName} = getCoreConfigFromConfig(config);
+  const {
+    key,
+    expiresIn,
+    refreshExpiresIn,
+    securityKeyRule,
+    fixedSecurityCodes,
+    isRateLimiterEnabled,
+    rateLimiterPoints: points,
+    rateLimiterBlockDurationSeconds: blockDuration,
+    rateLimiterDuration: duration,
+    sendKeyPlugin: sendKeyPluginName
+  } = getCoreConfigFromConfig(config);
+
   if(!sendKeyPluginName) {
     console.log('sendKeyPlugin plugin is undefined');
     process.exit(-1);
   }
 
   const sendKeyPlugin = require(path.resolve(`./node_modules/${sendKeyPluginName}/plugin`));
+  const handleRateLimiter = getHandleRateLimiter({ isRateLimiterEnabled, points, blockDuration, duration });
 
-  router.post('/key', async function handleKeyGeneration(ctx) {
+  router.post('/key', handleRateLimiter, async function handleKeyGeneration(ctx) {
     const {user, redirectUrl, params} = ctx.request.body;
     const token = getToken({u: user, p: params}, key, {expiresIn});
     const ekey = encrypt(token, key);
