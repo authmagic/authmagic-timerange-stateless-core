@@ -13,4 +13,8 @@ module.exports = {
   // username: securityCode
   fixedSecurityCodes: {
   },
+  isRateLimiterEnabled: true,
+  rateLimiterBlockDurationSeconds: 1800,
+  rateLimiterPoints: 3,
+  rateLimiterDuration: 600,
 };
