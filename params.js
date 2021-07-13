@@ -14,11 +14,17 @@ module.exports = {
   fixedSecurityCodes: {
   },
   rateLimiterConfig: {
-    '/key': {
-      isRateLimiterEnabled: true,
-      blockDuration: 1800,
-      points: 3,
-      duration: 600,
-    },
+    '/key': [
+      {
+        isRateLimiterEnabled: true,
+        key: ['ip'],
+        limiterOptions: {
+          duration: 600,
+          points: 10,
+          blockDuration: 1800,
+        },
+        getErrorDescription: ({ ip }) => `Too Many Requests for ${ip}.`,
+      },
+    ],
   },
 };
