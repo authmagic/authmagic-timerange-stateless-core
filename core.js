@@ -23,7 +23,7 @@ const wrapKey = (securityKey, key) => securityKey + key.substr(0, key.length - s
 const getHandleRateLimiters = (options) => {
   const rateLimiters = _.map(
     _.filter(options, { isRateLimiterEnabled: true }),
-    ({ key, limiterOptions }) => {
+    ({ key, limiterOptions, getErrorDescription }) => {
       const rateLimiter = new RateLimiterMemory(limiterOptions);
 
       return async (ctx, next) => {
@@ -33,7 +33,7 @@ const getHandleRateLimiters = (options) => {
           await next();
         } catch (rejRes) {
           ctx.status = 429;
-          ctx.body = `Too Many Requests for ${ctx.ip}.`;
+          ctx.body = getErrorDescription(ctx);
         }
       };
   });
