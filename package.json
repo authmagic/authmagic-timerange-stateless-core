@@ -27,7 +27,7 @@
   "author": "Oleksandr Knyga <oleksandrknyga@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.25.0"
+    "ava": "^5.1.0"
   },
   "bugs": {
     "url": "https://github.com/authmagic/authmagic-timerange-stateless-core/issues"
